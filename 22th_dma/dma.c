@@ -50,7 +50,7 @@ static u32 dst_phys;
 
 static volatile struct s3c_dma_regs *dma_regs;
 static DECLARE_WAIT_QUEUE_HEAD(dma_waitq);
-/* ÖÐ¶ÏÊ±¼ä±êÖ¾ */
+/* ä¸­æ–­æ—¶é—´æ ‡å¿— */
 static volatile int ev_dma = 0;
 
 static int s3c_dma_ioctl (struct inode *inode, struct file *file, unsigned int cmd, unsigned long data)
@@ -81,16 +81,16 @@ static int s3c_dma_ioctl (struct inode *inode, struct file *file, unsigned int c
 		{
 			ev_dma = 0;
 			
-			/*°ÑÔ´¡£Ä¿µÄ£¬³¤¶È ¸æËßDMA*/
+			/*æŠŠæºã€‚ç›®çš„ï¼Œé•¿åº¦ å‘Šè¯‰DMA*/
 			dma_regs->disrc		= src_phys;
-			dma_regs->disrcc	= (0<<1) | (0<<0); /*Ô´Î»ÓÚAHB×ÜÏß£¬Ô´µØÖ·µÝÔö*/
+			dma_regs->disrcc	= (0<<1) | (0<<0); /*æºä½äºŽAHBæ€»çº¿ï¼Œæºåœ°å€é€’å¢ž*/
 			dma_regs->didst		= dst_phys;
-			dma_regs->didstc	= (0<<2) | (0<<1) | (0<<0);/*Ä¿µÄÎ»ÓÚAHB×ÜÏß£¬Ä¿µÄµØÖ·µÝÔö*/
-			dma_regs->dcon		= (1<<30)| (1<<29)| (0<<28)| (1<<27) |(0<<23) | (0<<20) | (BUF_SIZE<<0) ;/* Ê¹ÄÜÖÐ¶Ï£¬µ¥¸ö´«Êä£¬Èí¼þ´¥·¢£¬Ã¿´Î´«ÊäÒ»¸ö×Ö½Ú */
-			dma_regs->dmasktrig = (1<<1) | (1<<0) ; /*Æô¶¯DMA*/
+			dma_regs->didstc	= (0<<2) | (0<<1) | (0<<0);/*ç›®çš„ä½äºŽAHBæ€»çº¿ï¼Œç›®çš„åœ°å€é€’å¢ž*/
+			dma_regs->dcon		= (1<<30)| (1<<29)| (0<<28)| (1<<27) |(0<<23) | (0<<20) | (BUF_SIZE<<0) ;/* ä½¿èƒ½ä¸­æ–­ï¼Œå•ä¸ªä¼ è¾“ï¼Œè½¯ä»¶è§¦å‘ï¼Œæ¯æ¬¡ä¼ è¾“ä¸€ä¸ªå­—èŠ‚ */
+			dma_regs->dmasktrig = (1<<1) | (1<<0) ; /*å¯åŠ¨DMA*/
 
-			/*Ê²Ã´Ê±ºò½áÊø ?*/
-			/*Æô¶¯DMAºóÐÝÃß*/
+			/*ä»€ä¹ˆæ—¶å€™ç»“æŸ ?*/
+			/*å¯åŠ¨DMAåŽä¼‘çœ */
 			wait_event_interruptible(dma_waitq,ev_dma);
 
 			if(memcmp(src, dst, BUF_SIZE) == 0)
@@ -116,10 +116,10 @@ static struct file_operations dma_fops = {
 
 static  irqreturn_t s3c_dma_irq(int irq, void *devid)
 {
-	/*»½ÐÑ*/
+	/*å”¤é†’*/
 	ev_dma = 1;
 	wake_up_interruptible(&dma_waitq);
-	/*»½ÐÑÓ¦ÓÃ³ÌÐò£¬´ÓÐÝÃßµÄµØ·½ÍùÏÂÖ´ÐÐ */
+	/*å”¤é†’åº”ç”¨ç¨‹åºï¼Œä»Žä¼‘çœ çš„åœ°æ–¹å¾€ä¸‹æ‰§è¡Œ */
 	return IRQ_HANDLED;
 }
 
@@ -131,7 +131,7 @@ static int s3c_dma_init(void)
 		return -EBUSY;
 	}
 	
-	/*·ÖÅäSRC,DST¶ÔÓ¦µÄ»º³åÇø £¬²»ÄÜÓÃkmalloc*/
+	/*åˆ†é…SRC,DSTå¯¹åº”çš„ç¼“å†²åŒº ï¼Œä¸èƒ½ç”¨kmalloc*/
 	src = dma_alloc_writecombine(NULL, BUF_SIZE, &src_phys, GFP_KERNEL);
 	if(NULL == src) 
 	{
@@ -151,7 +151,7 @@ static int s3c_dma_init(void)
 
 	major = register_chrdev(0, "s3c_dma", &dma_fops);
 
-	/*ÎªÁË×Ô¶¯´´½¨Éè±¸½Úµã*/
+	/*ä¸ºäº†è‡ªåŠ¨åˆ›å»ºè®¾å¤‡èŠ‚ç‚¹*/
 	cls = class_create(THIS_MODULE,"s3c_dma");
 	class_device_create(cls, NULL, MKDEV(major,0), NULL, "dma");  /* /dev/dma */
 
